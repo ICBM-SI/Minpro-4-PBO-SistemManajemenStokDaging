@@ -24,7 +24,7 @@ public class DagingView {
         System.out.println("=== " + judul + " ===");
     }
     
-    public void tampilkanPesan(String pesan) {
+    public void tampilkanPesan(String pesan){
         System.out.println(pesan);
     }
     
