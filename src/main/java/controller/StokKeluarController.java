@@ -17,29 +17,27 @@ import java.sql.SQLException;
  * @author LENOVO
  */
 public class StokKeluarController {
- 
     private final StokKeluarDAO stokKeluarDAO;
     private final DagingDAO dagingDAO;
     private final KaryawanDAO karyawanDAO;
     private final DagingView view;
- 
+    
     public StokKeluarController(StokKeluarDAO stokKeluarDAO, DagingDAO dagingDAO,
-                                 KaryawanDAO karyawanDAO, DagingView view) {
+        KaryawanDAO karyawanDAO, DagingView view){
         this.stokKeluarDAO = stokKeluarDAO;
         this.dagingDAO = dagingDAO;
         this.karyawanDAO = karyawanDAO;
         this.view = view;
     }
- 
-    public void jalankanMenu() {
+    
+    public void jalankanMenu(){
         int pilihanMenu;
         do {
-            view.tampilkanMenu("Menu Stok Keluar", new String[] {
+            view.tampilkanMenu("Menu Stok Keluar", new String[]{
                     "1. Catat Stok Keluar",
                     "2. Lihat Data Stok Keluar",
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 2);
- 
             try {
                 if (pilihanMenu == 1) {
                     catatStokKeluar();
@@ -51,7 +49,7 @@ public class StokKeluarController {
             }
         } while (pilihanMenu != 0);
     }
- 
+    
     private void catatStokKeluar() throws SQLException {
         view.tampilkanTabelDaging(dagingDAO.ambilSemua());
         int idDagingDipilih = view.bacaAngkaPositif("ID daging yang keluar (lihat daftar di atas): ");
@@ -60,7 +58,7 @@ public class StokKeluarController {
             view.tampilkanPesan("ID daging tidak ditemukan!");
             return;
         }
- 
+        
         view.tampilkanTabelKaryawan(karyawanDAO.ambilSemua());
         int idKaryawanDipilih = view.bacaAngkaPositif("ID karyawan yang mencatat (lihat daftar di atas): ");
         Karyawan karyawanTerpilih = karyawanDAO.cariById(idKaryawanDipilih);
@@ -68,29 +66,28 @@ public class StokKeluarController {
             view.tampilkanPesan("ID karyawan tidak ditemukan!");
             return;
         }
- 
+        
         String tanggalKeluar = view.bacaTanggal("Tanggal keluar");
         int jumlah = view.bacaAngkaPositif("Jumlah daging keluar (contoh: 3): ");
- 
+        
         if (jumlah > dagingTerpilih.getStok()) {
             view.tampilkanPesan("Stok tidak mencukupi! Stok tersedia saat ini: " + dagingTerpilih.getStok());
             return;
         }
- 
+        
         String alasan = view.bacaTeks("Alasan", "Penjualan ke pelanggan");
         String keterangan = view.bacaTeks("Keterangan", "Dijual ke pelanggan tetap");
- 
-        // ID stok keluar diisi 0 (dibuat otomatis oleh database)
+
         StokKeluar stokKeluarBaru = new StokKeluar(0, idDagingDipilih, idKaryawanDipilih,
                 tanggalKeluar, jumlah, alasan, keterangan);
         stokKeluarDAO.tambah(stokKeluarBaru);
         dagingDAO.ubahStok(idDagingDipilih, -jumlah);
- 
+        
         Daging dagingTerbaru = dagingDAO.cariById(idDagingDipilih);
         view.tampilkanPesan("Stok keluar berhasil dicatat, sisa stok daging menjadi "
                 + dagingTerbaru.getStok() + "!");
     }
- 
+    
     public void tampilkanDaftarStokKeluar() throws SQLException {
         view.tampilkanTabelStokKeluar(stokKeluarDAO.ambilSemua());
     }

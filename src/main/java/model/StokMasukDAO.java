@@ -13,13 +13,11 @@ import java.util.ArrayList;
  * @author LENOVO
  */
 public class StokMasukDAO {
- 
     private final Connection koneksi;
- 
     public StokMasukDAO(Connection koneksi) {
         this.koneksi = koneksi;
     }
- 
+    
     public void tambah(StokMasuk stokMasukBaru) throws SQLException {
         String sql = "INSERT INTO stok_masuk (id_daging, id_supplier, id_karyawan, tanggal_masuk, "
                 + "jumlah, keterangan) VALUES (?, ?, ?, STR_TO_DATE(?, '%d-%m-%Y'), ?, ?)";
@@ -33,7 +31,7 @@ public class StokMasukDAO {
         perintah.executeUpdate();
         perintah.close();
     }
- 
+    
     public ArrayList<StokMasuk> ambilSemua() throws SQLException {
         ArrayList<StokMasuk> daftarStokMasuk = new ArrayList<>();
         String sql = "SELECT id_stok_masuk, id_daging, id_supplier, id_karyawan, "
@@ -55,9 +53,7 @@ public class StokMasukDAO {
         perintah.close();
         return daftarStokMasuk;
     }
- 
-    // Tidak ada tabel master supplier, jadi ID supplier dibuat otomatis:
-    // nomor terbesar yang sudah ada + 1 (user tidak perlu mengetiknya).
+    
     public int ambilIdSupplierBerikutnya() throws SQLException {
         PreparedStatement perintah = koneksi.prepareStatement(
                 "SELECT COALESCE(MAX(id_supplier), 0) + 1 AS id_berikutnya FROM stok_masuk");

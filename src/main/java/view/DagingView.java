@@ -14,50 +14,40 @@ import java.util.Scanner;
  * @author LENOVO
  */
 public class DagingView {
- 
     private final Scanner scanner;
- 
+    
     public DagingView(Scanner scanner) {
         this.scanner = scanner;
     }
- 
+    
     public void tampilkanJudul(String judul) {
         System.out.println();
         System.out.println("=== " + judul + " ===");
     }
- 
+    
     public void tampilkanPesan(String pesan) {
         System.out.println(pesan);
     }
- 
-    // Satu method untuk mencetak judul + semua pilihan menu, dipakai oleh menu
-    // utama maupun semua submenu (supaya tidak menulis println berulang-ulang).
     public void tampilkanMenu(String judul, String[] daftarPilihan) {
         tampilkanJudul(judul);
         for (int i = 0; i < daftarPilihan.length; i++) {
             System.out.println(daftarPilihan[i]);
         }
     }
- 
-    // ---------- OVERLOADING: tampilkanBarisData untuk tiap jenis entitas ----------
-    // Nama method sama, tapi tipe parameter beda -> Java memilih otomatis saat kompilasi
+
     public void tampilkanBarisData(Daging dagingItem) {
         dagingItem.tampilkanDetail();
     }
- 
     public void tampilkanBarisData(Karyawan karyawanItem) {
         karyawanItem.tampilkanDetail();
     }
- 
     public void tampilkanBarisData(StokMasuk stokMasukItem) {
         stokMasukItem.tampilkanDetail();
     }
- 
     public void tampilkanBarisData(StokKeluar stokKeluarItem) {
         stokKeluarItem.tampilkanDetail();
     }
- 
-    // ---------- TABEL PER ENTITAS (header + perulangan tampil data) ----------
+
     public void tampilkanTabelDaging(ArrayList<Daging> daftarDaging) {
         System.out.println("ID | Nama | Bagian | Berat | Tgl Masuk | Tgl Expired | Stok | Status");
         if (daftarDaging.isEmpty()) {
@@ -68,7 +58,7 @@ public class DagingView {
             tampilkanBarisData(dagingItem);
         }
     }
- 
+    
     public void tampilkanTabelKaryawan(ArrayList<Karyawan> daftarKaryawan) {
         System.out.println("ID | Nama | Jabatan");
         if (daftarKaryawan.isEmpty()) {
@@ -79,7 +69,7 @@ public class DagingView {
             tampilkanBarisData(karyawanItem);
         }
     }
- 
+    
     public void tampilkanTabelStokMasuk(ArrayList<StokMasuk> daftarStokMasuk) {
         System.out.println("ID | Daging | Supplier | Karyawan | Tanggal | Jumlah | Keterangan");
         if (daftarStokMasuk.isEmpty()) {
@@ -90,7 +80,7 @@ public class DagingView {
             tampilkanBarisData(stokMasukItem);
         }
     }
- 
+    
     public void tampilkanTabelStokKeluar(ArrayList<StokKeluar> daftarStokKeluar) {
         System.out.println("ID | Daging | Karyawan | Tanggal | Jumlah | Alasan | Keterangan");
         if (daftarStokKeluar.isEmpty()) {
@@ -101,11 +91,7 @@ public class DagingView {
             tampilkanBarisData(stokKeluarItem);
         }
     }
- 
-    // =========================================================
-    // BAGIAN INPUT (membaca & memvalidasi input dari keyboard)
-    // =========================================================
-    // ---------- OVERLOADING: bacaAngka tanpa batas & dengan batas rentang ----------
+    
     public int bacaAngka(String label) {
         while (true) {
             System.out.print(label);
@@ -117,7 +103,7 @@ public class DagingView {
             return Integer.parseInt(teksInput);
         }
     }
- 
+    
     public int bacaAngka(String label, int batasMinimum, int batasMaksimum) {
         while (true) {
             int nilaiAngka = bacaAngka(label);
@@ -128,7 +114,7 @@ public class DagingView {
             return nilaiAngka;
         }
     }
- 
+    
     public int bacaAngkaPositif(String label) {
         while (true) {
             int nilaiAngka = bacaAngka(label);
@@ -139,7 +125,7 @@ public class DagingView {
             return nilaiAngka;
         }
     }
- 
+    
     public int bacaAngkaNonNegatif(String label) {
         while (true) {
             int nilaiAngka = bacaAngka(label);
@@ -150,7 +136,7 @@ public class DagingView {
             return nilaiAngka;
         }
     }
- 
+    
     public double bacaAngkaDesimalPositif(String label) {
         while (true) {
             System.out.print(label);
@@ -167,8 +153,7 @@ public class DagingView {
             return nilaiDesimal;
         }
     }
- 
-    // ---------- OVERLOADING: bacaTeks polos & dengan contoh isian ----------
+
     public String bacaTeks(String label) {
         while (true) {
             System.out.print(label);
@@ -180,12 +165,11 @@ public class DagingView {
             return teksInput;
         }
     }
- 
+    
     public String bacaTeks(String label, String contohIsian) {
         return bacaTeks(label + " (contoh: " + contohIsian + "): ");
     }
- 
-    // validasi tanggal format dd-MM-yyyy (benar-benar dicek, bukan cuma tidak kosong)
+
     public String bacaTanggal(String label) {
         while (true) {
             System.out.print(label + " (format " + Daging.FORMAT_TANGGAL + ", contoh: 05-10-2026): ");

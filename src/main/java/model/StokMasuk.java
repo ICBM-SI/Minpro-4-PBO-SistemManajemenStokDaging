@@ -11,25 +11,24 @@ package model;
 public class StokMasuk extends TransaksiStok {
     private int idSupplier;
     public StokMasuk(int idStokMasuk, int idDaging, int idSupplier, int idKaryawan,
-                      String tanggalMasuk, int jumlah, String keterangan) {
+    String tanggalMasuk, int jumlah, String keterangan){
         super(idStokMasuk, idDaging, idKaryawan, tanggalMasuk, jumlah, keterangan);
         setIdSupplier(idSupplier);
     }
  
-    public int getIdSupplier() { return idSupplier; }
+    public int getIdSupplier() { return idSupplier;}
  
-    public void setIdSupplier(int idSupplier) {
-        if (Daging.isAngkaPositif(idSupplier)) {
+    public void setIdSupplier(int idSupplier){
+        if (Daging.isAngkaPositif(idSupplier)){
             this.idSupplier = idSupplier;
         } else {
             System.out.println("[Peringatan] ID supplier harus lebih dari 0, nilai tidak diubah");
         }
     }
- 
+    
     @Override
     public void tampilkanDetail() {
         System.out.println(getIdTransaksi() + " | Daging:" + getIdDaging() + " | Supplier:" + idSupplier
-                + " | Karyawan:" + getIdKaryawan() + " | " + getTanggalTransaksi() + " | " + getJumlah()
-                + " | " + getKeterangan());
+        + " | Karyawan:" + getIdKaryawan() + " | " + getTanggalTransaksi() + " | " + getJumlah() + " | " + getKeterangan());
     }
 }

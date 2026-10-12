@@ -13,15 +13,12 @@ import java.sql.SQLException;
  * @author LENOVO
  */
 public class Karyawancontroller {
- 
     private final KaryawanDAO karyawanDAO;
     private final DagingView view;
- 
     public Karyawancontroller(KaryawanDAO karyawanDAO, DagingView view) {
         this.karyawanDAO = karyawanDAO;
         this.view = view;
     }
- 
     public void jalankanMenu() {
         int pilihanMenu;
         do {
@@ -30,7 +27,6 @@ public class Karyawancontroller {
                     "2. Lihat Data Karyawan",
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 2);
- 
             try {
                 if (pilihanMenu == 1) {
                     tambahKaryawan();
@@ -42,16 +38,14 @@ public class Karyawancontroller {
             }
         } while (pilihanMenu != 0);
     }
- 
+    
     private void tambahKaryawan() throws SQLException {
         String namaKaryawan = view.bacaTeks("Nama karyawan", "Budi Santoso");
         String jabatan = view.bacaTeks("Jabatan", "Admin Gudang");
- 
-        // ID diisi 0 sebagai tanda "belum punya ID"; ID sebenarnya dibuat otomatis oleh database
         karyawanDAO.tambah(new Karyawan(0, namaKaryawan, jabatan));
         view.tampilkanPesan("Data karyawan berhasil ditambahkan!");
     }
- 
+    
     public void tampilkanDaftarKaryawan() throws SQLException {
         view.tampilkanTabelKaryawan(karyawanDAO.ambilSemua());
     }

@@ -10,7 +10,6 @@ import java.sql.SQLException;
  * @author LENOVO
  */
 public class TestKoneksi {
- 
     public static void main(String[] args) {
         try {
             Connection koneksi = Koneksi.getKoneksi();

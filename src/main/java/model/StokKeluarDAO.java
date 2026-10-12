@@ -13,13 +13,11 @@ import java.util.ArrayList;
  * @author LENOVO
  */
 public class StokKeluarDAO {
- 
     private final Connection koneksi;
- 
     public StokKeluarDAO(Connection koneksi) {
         this.koneksi = koneksi;
     }
- 
+    
     public void tambah(StokKeluar stokKeluarBaru) throws SQLException {
         String sql = "INSERT INTO stok_keluar (id_daging, id_karyawan, tanggal_keluar, jumlah, "
                 + "alasan, keterangan) VALUES (?, ?, STR_TO_DATE(?, '%d-%m-%Y'), ?, ?, ?)";
@@ -33,7 +31,7 @@ public class StokKeluarDAO {
         perintah.executeUpdate();
         perintah.close();
     }
- 
+    
     public ArrayList<StokKeluar> ambilSemua() throws SQLException {
         ArrayList<StokKeluar> daftarStokKeluar = new ArrayList<>();
         String sql = "SELECT id_stok_keluar, id_daging, id_karyawan, "

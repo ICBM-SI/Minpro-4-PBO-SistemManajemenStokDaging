@@ -13,13 +13,11 @@ import java.util.ArrayList;
  * @author LENOVO
  */
 public class KaryawanDAO {
- 
     private final Connection koneksi;
- 
     public KaryawanDAO(Connection koneksi) {
         this.koneksi = koneksi;
     }
- 
+    
     public void tambah(Karyawan karyawanBaru) throws SQLException {
         PreparedStatement perintah = koneksi.prepareStatement(
                 "INSERT INTO karyawan (nama_karyawan, jabatan) VALUES (?, ?)");
@@ -28,7 +26,7 @@ public class KaryawanDAO {
         perintah.executeUpdate();
         perintah.close();
     }
- 
+    
     public ArrayList<Karyawan> ambilSemua() throws SQLException {
         ArrayList<Karyawan> daftarKaryawan = new ArrayList<>();
         PreparedStatement perintah = koneksi.prepareStatement(
@@ -41,7 +39,7 @@ public class KaryawanDAO {
         perintah.close();
         return daftarKaryawan;
     }
- 
+    
     public Karyawan cariById(int idKaryawan) throws SQLException {
         PreparedStatement perintah = koneksi.prepareStatement(
                 "SELECT id_karyawan, nama_karyawan, jabatan FROM karyawan WHERE id_karyawan = ?");
@@ -55,7 +53,7 @@ public class KaryawanDAO {
         perintah.close();
         return karyawanDitemukan;
     }
- 
+    
     private Karyawan petakanBaris(ResultSet hasil) throws SQLException {
         return new Karyawan(
                 hasil.getInt("id_karyawan"),

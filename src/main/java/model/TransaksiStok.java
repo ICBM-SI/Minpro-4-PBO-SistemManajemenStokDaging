@@ -15,7 +15,7 @@ public abstract class TransaksiStok {
     private String tanggalTransaksi;
     private int jumlah;
     private String keterangan;
- 
+    
     protected TransaksiStok(int idTransaksi, int idDaging, int idKaryawan, String tanggalTransaksi, int jumlah, String keterangan){
         this.idTransaksi = idTransaksi;
         this.idDaging = idDaging;
@@ -24,7 +24,7 @@ public abstract class TransaksiStok {
         setJumlah(jumlah);
         setKeterangan(keterangan);
     }
- 
+    
     //getter
     public final int getIdTransaksi() { return idTransaksi;}
     public final int getIdDaging() { return idDaging;}
@@ -32,7 +32,7 @@ public abstract class TransaksiStok {
     public String getTanggalTransaksi() { return tanggalTransaksi;}
     public int getJumlah() { return jumlah;}
     public String getKeterangan() { return keterangan;}
- 
+    
     //setter
     public void setIdKaryawan(int idKaryawan) {
         if (Daging.isAngkaPositif(idKaryawan)) {
@@ -41,7 +41,7 @@ public abstract class TransaksiStok {
             System.out.println("[Peringatan] ID karyawan harus lebih dari 0, nilai tidak diubah");
         }
     }
- 
+    
     public void setTanggalTransaksi(String tanggalTransaksi) {
         if (Daging.isTanggalValid(tanggalTransaksi)) {
             this.tanggalTransaksi = tanggalTransaksi;
@@ -50,7 +50,7 @@ public abstract class TransaksiStok {
                     + ", nilai tidak diubah");
         }
     }
- 
+    
     public void setJumlah(int jumlah) {
         if (Daging.isAngkaPositif(jumlah)) {
             this.jumlah = jumlah;
@@ -58,7 +58,7 @@ public abstract class TransaksiStok {
             System.out.println("[Peringatan] Jumlah harus lebih dari 0, nilai tidak diubah");
         }
     }
- 
+    
     public void setKeterangan(String keterangan) {
         if (Daging.isTeksValid(keterangan)) {
             this.keterangan = keterangan;

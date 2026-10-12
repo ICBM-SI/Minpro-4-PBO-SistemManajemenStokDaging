@@ -12,18 +12,17 @@ public class Karyawan {
     private final int idKaryawan;
     private String namaKaryawan;
     private String jabatan;
- 
     public Karyawan(int idKaryawan, String namaKaryawan, String jabatan) {
         this.idKaryawan = idKaryawan;
         setNamaKaryawan(namaKaryawan);
         setJabatan(jabatan);
     }
- 
+    
     //getter
     public final int getIdKaryawan() { return idKaryawan; }
     public String getNamaKaryawan() { return namaKaryawan; }
     public String getJabatan() { return jabatan; }
- 
+    
     //setter
     public void setNamaKaryawan(String namaKaryawan) {
         if (Daging.isTeksValid(namaKaryawan)) {
@@ -32,7 +31,7 @@ public class Karyawan {
             System.out.println("[Peringatan] Nama karyawan tidak boleh kosong, nilai tidak diubah");
         }
     }
- 
+    
     public void setJabatan(String jabatan) {
         if (Daging.isTeksValid(jabatan)) {
             this.jabatan = jabatan;
@@ -40,7 +39,7 @@ public class Karyawan {
             System.out.println("[Peringatan] Jabatan tidak boleh kosong, nilai tidak diubah");
         }
     }
- 
+    
     public void tampilkanDetail() {
         System.out.println(idKaryawan + " | " + namaKaryawan + " | " + jabatan);
     }

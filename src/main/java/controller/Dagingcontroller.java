@@ -14,15 +14,12 @@ import java.util.ArrayList;
  * @author LENOVO
  */
 public class Dagingcontroller {
- 
     private final DagingDAO dagingDAO;
     private final DagingView view;
- 
     public Dagingcontroller(DagingDAO dagingDAO, DagingView view) {
         this.dagingDAO = dagingDAO;
         this.view = view;
     }
- 
     public void jalankanMenu() {
         int pilihanMenu;
         do {
@@ -33,7 +30,6 @@ public class Dagingcontroller {
                     "4. Hapus Data Daging",
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 4);
- 
             try {
                 if (pilihanMenu == 1) {
                     tambahDaging();
@@ -49,7 +45,7 @@ public class Dagingcontroller {
             }
         } while (pilihanMenu != 0);
     }
- 
+    
     private void tambahDaging() throws SQLException {
         String namaDaging = view.bacaTeks("Nama daging", "Daging Sapi");
         String bagianDaging = view.bacaTeks("Bagian daging", "Paha");
@@ -58,18 +54,17 @@ public class Dagingcontroller {
         String tanggalExpired = view.bacaTanggal("Tanggal expired");
         int stok = view.bacaAngkaNonNegatif("Jumlah stok awal (contoh: 20): ");
         String status = view.bacaTeks("Status", "Tersedia");
- 
-        // ID diisi 0 sebagai tanda "belum punya ID"; ID sebenarnya dibuat otomatis oleh database
+
         Daging dagingBaru = new Daging(0, namaDaging, bagianDaging, berat,
                 tanggalMasuk, tanggalExpired, stok, status);
         dagingDAO.tambah(dagingBaru);
         view.tampilkanPesan("Data daging berhasil ditambahkan!");
     }
- 
+    
     public void tampilkanDaftarDaging() throws SQLException {
         view.tampilkanTabelDaging(dagingDAO.ambilSemua());
     }
- 
+    
     private void ubahDaging() throws SQLException {
         ArrayList<Daging> daftarDaging = dagingDAO.ambilSemua();
         view.tampilkanTabelDaging(daftarDaging);
@@ -82,14 +77,14 @@ public class Dagingcontroller {
             view.tampilkanPesan("ID daging tidak ditemukan!");
             return;
         }
- 
+        
         dagingTerpilih.setNamaDaging(view.bacaTeks("Nama daging baru", dagingTerpilih.getNamaDaging()));
         dagingTerpilih.setStok(view.bacaAngkaNonNegatif("Stok baru (contoh: 15): "));
         dagingTerpilih.setStatus(view.bacaTeks("Status baru", "Tersedia"));
         dagingDAO.ubah(dagingTerpilih);
         view.tampilkanPesan("Data daging berhasil diubah!");
     }
- 
+    
     private void hapusDaging() throws SQLException {
         ArrayList<Daging> daftarDaging = dagingDAO.ambilSemua();
         view.tampilkanTabelDaging(daftarDaging);

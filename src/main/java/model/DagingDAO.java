@@ -13,20 +13,17 @@ import java.util.ArrayList;
  * @author LENOVO
  */
 public class DagingDAO {
- 
-    // query SELECT dipakai di dua method, jadi ditaruh sebagai konstanta
     private static final String SQL_PILIH_DAGING = "SELECT id_daging, nama_daging, bagian_daging, berat, "
             + "DATE_FORMAT(tanggal_masuk, '%d-%m-%Y') AS tanggal_masuk, "
             + "DATE_FORMAT(tanggal_expired, '%d-%m-%Y') AS tanggal_expired, "
             + "stok, status FROM daging";
- 
     private final Connection koneksi;
  
     public DagingDAO(Connection koneksi) {
         this.koneksi = koneksi;
     }
- 
-    // CREATE - ID tidak diisi, dibuat otomatis oleh database (AUTO_INCREMENT)
+
+    //create
     public void tambah(Daging dagingBaru) throws SQLException {
         String sql = "INSERT INTO daging (nama_daging, bagian_daging, berat, tanggal_masuk, "
                 + "tanggal_expired, stok, status) "
@@ -42,8 +39,8 @@ public class DagingDAO {
         perintah.executeUpdate();
         perintah.close();
     }
- 
-    // READ - semua data
+    
+    //read
     public ArrayList<Daging> ambilSemua() throws SQLException {
         ArrayList<Daging> daftarDaging = new ArrayList<>();
         PreparedStatement perintah = koneksi.prepareStatement(SQL_PILIH_DAGING + " ORDER BY id_daging");
@@ -55,8 +52,7 @@ public class DagingDAO {
         perintah.close();
         return daftarDaging;
     }
- 
-    // READ - satu data berdasarkan ID (null kalau tidak ditemukan)
+
     public Daging cariById(int idDaging) throws SQLException {
         PreparedStatement perintah = koneksi.prepareStatement(SQL_PILIH_DAGING + " WHERE id_daging = ?");
         perintah.setInt(1, idDaging);
@@ -69,8 +65,8 @@ public class DagingDAO {
         perintah.close();
         return dagingDitemukan;
     }
- 
-    // UPDATE - nama, stok, dan status (sesuai yang bisa diubah di menu Ubah)
+    
+    //update
     public void ubah(Daging dagingDiubah) throws SQLException {
         String sql = "UPDATE daging SET nama_daging = ?, stok = ?, status = ? WHERE id_daging = ?";
         PreparedStatement perintah = koneksi.prepareStatement(sql);
@@ -81,16 +77,15 @@ public class DagingDAO {
         perintah.executeUpdate();
         perintah.close();
     }
- 
-    // DELETE
+    
+    //dilet
     public void hapus(int idDaging) throws SQLException {
         PreparedStatement perintah = koneksi.prepareStatement("DELETE FROM daging WHERE id_daging = ?");
         perintah.setInt(1, idDaging);
         perintah.executeUpdate();
         perintah.close();
     }
- 
-    // Tambah/kurangi stok. selisihStok positif = bertambah (stok masuk), negatif = berkurang (stok keluar)
+    
     public void ubahStok(int idDaging, int selisihStok) throws SQLException {
         PreparedStatement perintah = koneksi.prepareStatement(
                 "UPDATE daging SET stok = stok + ? WHERE id_daging = ?");
@@ -99,9 +94,7 @@ public class DagingDAO {
         perintah.executeUpdate();
         perintah.close();
     }
- 
-    // Daging yang sudah punya riwayat stok masuk/keluar tidak boleh dihapus
-    // (ada foreign key), jadi controller mengecek ini dulu sebelum menghapus.
+
     public boolean punyaRiwayatTransaksi(int idDaging) throws SQLException {
         String sql = "SELECT (SELECT COUNT(*) FROM stok_masuk WHERE id_daging = ?) "
                 + "+ (SELECT COUNT(*) FROM stok_keluar WHERE id_daging = ?) AS total";
@@ -115,9 +108,7 @@ public class DagingDAO {
         perintah.close();
         return totalTransaksi > 0;
     }
- 
-    // mengubah satu baris hasil query menjadi satu objek Daging
-    // (ditaruh di sini supaya tidak ditulis ulang di ambilSemua() dan cariById())
+    
     private Daging petakanBaris(ResultSet hasil) throws SQLException {
         return new Daging(
                 hasil.getInt("id_daging"),

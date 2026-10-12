@@ -8,16 +8,15 @@ package model;
  *
  * @author LENOVO
  */
-public class StokKeluar extends TransaksiStok {
+public class StokKeluar extends TransaksiStok{
     private String alasan;
     public StokKeluar(int idStokKeluar, int idDaging, int idKaryawan, String tanggalKeluar,
-                       int jumlah, String alasan, String keterangan) {
+        int jumlah, String alasan, String keterangan){
         super(idStokKeluar, idDaging, idKaryawan, tanggalKeluar, jumlah, keterangan);
         setAlasan(alasan);
     }
- 
+    
     public String getAlasan() { return alasan; }
- 
     public void setAlasan(String alasan) {
         if (Daging.isTeksValid(alasan)) {
             this.alasan = alasan;
@@ -29,6 +28,6 @@ public class StokKeluar extends TransaksiStok {
     @Override
     public void tampilkanDetail() {
         System.out.println(getIdTransaksi() + " | Daging:" + getIdDaging() + " | Karyawan:" + getIdKaryawan()
-                + " | " + getTanggalTransaksi() + " | " + getJumlah() + " | " + alasan + " | " + getKeterangan());
+        + " | " + getTanggalTransaksi() + " | " + getJumlah() + " | " + alasan + " | " + getKeterangan());
     }
 }
