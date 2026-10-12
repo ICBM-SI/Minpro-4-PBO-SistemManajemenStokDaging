@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import config.Koneksi;
 /**
  *
  * @author LENOVO
@@ -17,51 +18,66 @@ public class StokMasukDAO {
     public StokMasukDAO(Connection koneksi) {
         this.koneksi = koneksi;
     }
-    
-    public void tambah(StokMasuk stokMasukBaru) throws SQLException {
+
+    public boolean tambah(StokMasuk stokMasukBaru) {
         String sql = "INSERT INTO stok_masuk (id_daging, id_supplier, id_karyawan, tanggal_masuk, "
                 + "jumlah, keterangan) VALUES (?, ?, ?, STR_TO_DATE(?, '%d-%m-%Y'), ?, ?)";
-        PreparedStatement perintah = koneksi.prepareStatement(sql);
-        perintah.setInt(1, stokMasukBaru.getIdDaging());
-        perintah.setInt(2, stokMasukBaru.getIdSupplier());
-        perintah.setInt(3, stokMasukBaru.getIdKaryawan());
-        perintah.setString(4, stokMasukBaru.getTanggalTransaksi());
-        perintah.setInt(5, stokMasukBaru.getJumlah());
-        perintah.setString(6, stokMasukBaru.getKeterangan());
-        perintah.executeUpdate();
-        perintah.close();
+        try {
+            PreparedStatement perintah = koneksi.prepareStatement(sql);
+            perintah.setInt(1, stokMasukBaru.getIdDaging());
+            perintah.setInt(2, stokMasukBaru.getIdSupplier());
+            perintah.setInt(3, stokMasukBaru.getIdKaryawan());
+            perintah.setString(4, stokMasukBaru.getTanggalTransaksi());
+            perintah.setInt(5, stokMasukBaru.getJumlah());
+            perintah.setString(6, stokMasukBaru.getKeterangan());
+            perintah.executeUpdate();
+            perintah.close();
+            return true;
+        } catch (SQLException kesalahan) {
+            Koneksi.laporkanKesalahan("menambah data stok masuk", kesalahan);
+            return false;
+        }
     }
     
-    public ArrayList<StokMasuk> ambilSemua() throws SQLException {
+    public ArrayList<StokMasuk> ambilSemua() {
         ArrayList<StokMasuk> daftarStokMasuk = new ArrayList<>();
         String sql = "SELECT id_stok_masuk, id_daging, id_supplier, id_karyawan, "
                 + "DATE_FORMAT(tanggal_masuk, '%d-%m-%Y') AS tanggal_masuk, jumlah, keterangan "
                 + "FROM stok_masuk ORDER BY id_stok_masuk";
-        PreparedStatement perintah = koneksi.prepareStatement(sql);
-        ResultSet hasil = perintah.executeQuery();
-        while (hasil.next()) {
-            daftarStokMasuk.add(new StokMasuk(
-                    hasil.getInt("id_stok_masuk"),
-                    hasil.getInt("id_daging"),
-                    hasil.getInt("id_supplier"),
-                    hasil.getInt("id_karyawan"),
-                    hasil.getString("tanggal_masuk"),
-                    hasil.getInt("jumlah"),
-                    hasil.getString("keterangan")));
+        try {
+            PreparedStatement perintah = koneksi.prepareStatement(sql);
+            ResultSet hasil = perintah.executeQuery();
+            while (hasil.next()) {
+                daftarStokMasuk.add(new StokMasuk(
+                        hasil.getInt("id_stok_masuk"),
+                        hasil.getInt("id_daging"),
+                        hasil.getInt("id_supplier"),
+                        hasil.getInt("id_karyawan"),
+                        hasil.getString("tanggal_masuk"),
+                        hasil.getInt("jumlah"),
+                        hasil.getString("keterangan")));
+            }
+            hasil.close();
+            perintah.close();
+        } catch (SQLException kesalahan) {
+            Koneksi.laporkanKesalahan("mengambil data stok masuk", kesalahan);
         }
-        hasil.close();
-        perintah.close();
         return daftarStokMasuk;
     }
     
-    public int ambilIdSupplierBerikutnya() throws SQLException {
-        PreparedStatement perintah = koneksi.prepareStatement(
-                "SELECT COALESCE(MAX(id_supplier), 0) + 1 AS id_berikutnya FROM stok_masuk");
-        ResultSet hasil = perintah.executeQuery();
-        hasil.next();
-        int idSupplierBerikutnya = hasil.getInt("id_berikutnya");
-        hasil.close();
-        perintah.close();
+    public int ambilIdSupplierBerikutnya() {
+        int idSupplierBerikutnya = 1;
+        try {
+            PreparedStatement perintah = koneksi.prepareStatement(
+                    "SELECT COALESCE(MAX(id_supplier), 0) + 1 AS id_berikutnya FROM stok_masuk");
+            ResultSet hasil = perintah.executeQuery();
+            hasil.next();
+            idSupplierBerikutnya = hasil.getInt("id_berikutnya");
+            hasil.close();
+            perintah.close();
+        } catch (SQLException kesalahan) {
+            Koneksi.laporkanKesalahan("mengambil ID supplier berikutnya", kesalahan);
+        }
         return idSupplierBerikutnya;
     }
 }

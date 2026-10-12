@@ -21,14 +21,12 @@ import java.util.Scanner;
  * @author LENOVO
  */
 public class ManajemenStokDaging {
-    public static void main(String[] args) {
+ 
+    public static void main(String[] args){
         Scanner scanner = new Scanner(System.in);
         DagingView view = new DagingView(scanner);
-        Connection koneksi = null;
-        try {
-            koneksi = Koneksi.getKoneksi();
-        } catch (SQLException kesalahanKoneksi) {
-            view.tampilkanPesan("Gagal terhubung ke database: " + kesalahanKoneksi.getMessage());
+        Connection koneksi = Koneksi.getConnection();
+        if (koneksi == null){
             view.tampilkanPesan("Periksa: (1) MySQL sudah menyala, (2) file db_stok_daging.sql sudah di-import,");
             view.tampilkanPesan("(3) URL/user/password di config/Koneksi.java sudah benar, (4) driver MySQL JDBC sudah ditambahkan.");
             scanner.close();
@@ -39,18 +37,15 @@ public class ManajemenStokDaging {
         KaryawanDAO karyawanDAO = new KaryawanDAO(koneksi);
         StokMasukDAO stokMasukDAO = new StokMasukDAO(koneksi);
         StokKeluarDAO stokKeluarDAO = new StokKeluarDAO(koneksi);
-        Dagingcontroller dagingController = new Dagingcontroller(
-                dagingDAO, view);
-        Karyawancontroller karyawanController = new Karyawancontroller(
-                karyawanDAO, view);
+        Dagingcontroller dagingController = new Dagingcontroller(dagingDAO, view);
+        Karyawancontroller karyawanController = new Karyawancontroller(karyawanDAO, view);
         StokMasukController stokMasukController = new StokMasukController(
                 stokMasukDAO, dagingDAO, karyawanDAO, view);
         StokKeluarController stokKeluarController = new StokKeluarController(
                 stokKeluarDAO, dagingDAO, karyawanDAO, view);
-
         int pilihanMenuUtama;
         do {
-            view.tampilkanMenu("Sistem Manajemen Stok Daging", new String[] {
+            view.tampilkanMenu("Sistem Manajemen Stok Daging", new String[]{
                     "1. Data Daging",
                     "2. Data Karyawan",
                     "3. Stok Masuk",
@@ -69,11 +64,10 @@ public class ManajemenStokDaging {
                 view.tampilkanPesan("Program selesai.");
             }
         } while (pilihanMenuUtama != 0);
-        
         try {
             koneksi.close();
-        } catch (SQLException kesalahanTutup) {
-            view.tampilkanPesan("Gagal menutup koneksi database: " + kesalahanTutup.getMessage());
+        } catch (SQLException kesalahan) {
+            Koneksi.laporkanKesalahan("menutup koneksi", kesalahan);
         }
         scanner.close();
     }

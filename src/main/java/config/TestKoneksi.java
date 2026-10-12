@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class TestKoneksi {
     public static void main(String[] args) {
         try {
-            Connection koneksi = Koneksi.getKoneksi();
+            Connection koneksi = Koneksi.getConnection();
             System.out.println("Koneksi berhasil!");
             koneksi.close();
         } catch (SQLException kesalahanKoneksi) {

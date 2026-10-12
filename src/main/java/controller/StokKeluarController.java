@@ -4,14 +4,13 @@
  */
 package controller;
 
-import model.DagingDAO;
-import model.KaryawanDAO;
-import model.StokKeluarDAO;
 import model.Daging;
+import model.DagingDAO;
 import model.Karyawan;
+import model.KaryawanDAO;
 import model.StokKeluar;
+import model.StokKeluarDAO;
 import view.DagingView;
-import java.sql.SQLException;
 /**
  *
  * @author LENOVO
@@ -21,9 +20,7 @@ public class StokKeluarController {
     private final DagingDAO dagingDAO;
     private final KaryawanDAO karyawanDAO;
     private final DagingView view;
-    
-    public StokKeluarController(StokKeluarDAO stokKeluarDAO, DagingDAO dagingDAO,
-        KaryawanDAO karyawanDAO, DagingView view){
+    public StokKeluarController(StokKeluarDAO stokKeluarDAO, DagingDAO dagingDAO, KaryawanDAO karyawanDAO, DagingView view) {
         this.stokKeluarDAO = stokKeluarDAO;
         this.dagingDAO = dagingDAO;
         this.karyawanDAO = karyawanDAO;
@@ -38,23 +35,19 @@ public class StokKeluarController {
                     "2. Lihat Data Stok Keluar",
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 2);
-            try {
-                if (pilihanMenu == 1) {
-                    catatStokKeluar();
-                } else if (pilihanMenu == 2) {
-                    tampilkanDaftarStokKeluar();
-                }
-            } catch (SQLException kesalahanDatabase) {
-                view.tampilkanPesan("Terjadi kesalahan database: " + kesalahanDatabase.getMessage());
+            if (pilihanMenu == 1){
+                catatStokKeluar();
+            } else if (pilihanMenu == 2){
+                tampilkanDaftarStokKeluar();
             }
         } while (pilihanMenu != 0);
     }
     
-    private void catatStokKeluar() throws SQLException {
+    private void catatStokKeluar(){
         view.tampilkanTabelDaging(dagingDAO.ambilSemua());
         int idDagingDipilih = view.bacaAngkaPositif("ID daging yang keluar (lihat daftar di atas): ");
         Daging dagingTerpilih = dagingDAO.cariById(idDagingDipilih);
-        if (dagingTerpilih == null) {
+        if (dagingTerpilih == null){
             view.tampilkanPesan("ID daging tidak ditemukan!");
             return;
         }
@@ -62,14 +55,13 @@ public class StokKeluarController {
         view.tampilkanTabelKaryawan(karyawanDAO.ambilSemua());
         int idKaryawanDipilih = view.bacaAngkaPositif("ID karyawan yang mencatat (lihat daftar di atas): ");
         Karyawan karyawanTerpilih = karyawanDAO.cariById(idKaryawanDipilih);
-        if (karyawanTerpilih == null) {
+        if (karyawanTerpilih == null){
             view.tampilkanPesan("ID karyawan tidak ditemukan!");
             return;
         }
         
         String tanggalKeluar = view.bacaTanggal("Tanggal keluar");
         int jumlah = view.bacaAngkaPositif("Jumlah daging keluar (contoh: 3): ");
-        
         if (jumlah > dagingTerpilih.getStok()) {
             view.tampilkanPesan("Stok tidak mencukupi! Stok tersedia saat ini: " + dagingTerpilih.getStok());
             return;
@@ -77,18 +69,22 @@ public class StokKeluarController {
         
         String alasan = view.bacaTeks("Alasan", "Penjualan ke pelanggan");
         String keterangan = view.bacaTeks("Keterangan", "Dijual ke pelanggan tetap");
-
         StokKeluar stokKeluarBaru = new StokKeluar(0, idDagingDipilih, idKaryawanDipilih,
                 tanggalKeluar, jumlah, alasan, keterangan);
-        stokKeluarDAO.tambah(stokKeluarBaru);
-        dagingDAO.ubahStok(idDagingDipilih, -jumlah);
+        if (!stokKeluarDAO.tambah(stokKeluarBaru)){
+            return;
+        }
+        if (!dagingDAO.ubahStok(idDagingDipilih, -jumlah)){
+            view.tampilkanPesan("Peringatan: transaksi tersimpan, tetapi stok daging gagal diperbarui.");
+            return;
+        }
         
         Daging dagingTerbaru = dagingDAO.cariById(idDagingDipilih);
         view.tampilkanPesan("Stok keluar berhasil dicatat, sisa stok daging menjadi "
                 + dagingTerbaru.getStok() + "!");
     }
     
-    public void tampilkanDaftarStokKeluar() throws SQLException {
+    public void tampilkanDaftarStokKeluar(){
         view.tampilkanTabelStokKeluar(stokKeluarDAO.ambilSemua());
     }
 }
