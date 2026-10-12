@@ -3,12 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package view;
-
 import model.Daging;
 import model.Karyawan;
 import model.StokKeluar;
 import model.StokMasuk;
- 
 import java.util.ArrayList;
 import java.util.Scanner;
 /**
@@ -16,7 +14,9 @@ import java.util.Scanner;
  * @author LENOVO
  */
 public class DagingView {
+ 
     private final Scanner scanner;
+ 
     public DagingView(Scanner scanner) {
         this.scanner = scanner;
     }
@@ -30,6 +30,8 @@ public class DagingView {
         System.out.println(pesan);
     }
  
+    // Satu method untuk mencetak judul + semua pilihan menu, dipakai oleh menu
+    // utama maupun semua submenu (supaya tidak menulis println berulang-ulang).
     public void tampilkanMenu(String judul, String[] daftarPilihan) {
         tampilkanJudul(judul);
         for (int i = 0; i < daftarPilihan.length; i++) {
@@ -37,7 +39,8 @@ public class DagingView {
         }
     }
  
-    //overloading
+    // ---------- OVERLOADING: tampilkanBarisData untuk tiap jenis entitas ----------
+    // Nama method sama, tapi tipe parameter beda -> Java memilih otomatis saat kompilasi
     public void tampilkanBarisData(Daging dagingItem) {
         dagingItem.tampilkanDetail();
     }
@@ -54,6 +57,7 @@ public class DagingView {
         stokKeluarItem.tampilkanDetail();
     }
  
+    // ---------- TABEL PER ENTITAS (header + perulangan tampil data) ----------
     public void tampilkanTabelDaging(ArrayList<Daging> daftarDaging) {
         System.out.println("ID | Nama | Bagian | Berat | Tgl Masuk | Tgl Expired | Stok | Status");
         if (daftarDaging.isEmpty()) {
@@ -98,6 +102,10 @@ public class DagingView {
         }
     }
  
+    // =========================================================
+    // BAGIAN INPUT (membaca & memvalidasi input dari keyboard)
+    // =========================================================
+    // ---------- OVERLOADING: bacaAngka tanpa batas & dengan batas rentang ----------
     public int bacaAngka(String label) {
         while (true) {
             System.out.print(label);
@@ -160,6 +168,7 @@ public class DagingView {
         }
     }
  
+    // ---------- OVERLOADING: bacaTeks polos & dengan contoh isian ----------
     public String bacaTeks(String label) {
         while (true) {
             System.out.print(label);
@@ -176,6 +185,7 @@ public class DagingView {
         return bacaTeks(label + " (contoh: " + contohIsian + "): ");
     }
  
+    // validasi tanggal format dd-MM-yyyy (benar-benar dicek, bukan cuma tidak kosong)
     public String bacaTanggal(String label) {
         while (true) {
             System.out.print(label + " (format " + Daging.FORMAT_TANGGAL + ", contoh: 05-10-2026): ");

@@ -3,16 +3,19 @@
  */
 
 package com.mycompany.manajemenstokdaging;
+import config.Koneksi;
 import controller.Dagingcontroller;
 import controller.Karyawancontroller;
 import controller.StokKeluarController;
 import controller.StokMasukController;
-import model.Daging;
-import model.Karyawan;
-import model.StokKeluar;
-import model.StokMasuk;
+import model.DagingDAO;
+import model.KaryawanDAO;
+import model.StokKeluarDAO;
+import model.StokMasukDAO;
 import view.DagingView;
-import java.util.ArrayList;
+ 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Scanner;
  
 /**
@@ -20,23 +23,33 @@ import java.util.Scanner;
  * @author LENOVO
  */
 public class ManajemenStokDaging {
+ 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         DagingView view = new DagingView(scanner);
  
-        ArrayList<Daging> daftarDaging = new ArrayList<>();
-        ArrayList<Karyawan> daftarKaryawan = new ArrayList<>();
-        ArrayList<StokMasuk> daftarStokMasuk = new ArrayList<>();
-        ArrayList<StokKeluar> daftarStokKeluar = new ArrayList<>();
+        Connection koneksi = null;
+        try {
+            koneksi = Koneksi.getKoneksi();
+        } catch (SQLException kesalahanKoneksi) {
+            view.tampilkanPesan("Gagal terhubung ke database: " + kesalahanKoneksi.getMessage());
+            view.tampilkanPesan("Periksa: (1) MySQL sudah menyala, (2) file db_stok_daging.sql sudah di-import,");
+            view.tampilkanPesan("(3) URL/user/password di config/Koneksi.java sudah benar, (4) driver MySQL JDBC sudah ditambahkan.");
+            scanner.close();
+            return;
+        }
  
-        Dagingcontroller dagingController = new Dagingcontroller(daftarDaging, view);
-        Karyawancontroller karyawanController = new Karyawancontroller(daftarKaryawan, view);
+        DagingDAO dagingDAO = new DagingDAO(koneksi);
+        KaryawanDAO karyawanDAO = new KaryawanDAO(koneksi);
+        StokMasukDAO stokMasukDAO = new StokMasukDAO(koneksi);
+        StokKeluarDAO stokKeluarDAO = new StokKeluarDAO(koneksi);
+ 
+        Dagingcontroller dagingController = new Dagingcontroller(dagingDAO, view);
+        Karyawancontroller karyawanController = new Karyawancontroller(karyawanDAO, view);
         StokMasukController stokMasukController = new StokMasukController(
-                daftarStokMasuk, dagingController, karyawanController, view);
+                stokMasukDAO, dagingDAO, karyawanDAO, view);
         StokKeluarController stokKeluarController = new StokKeluarController(
-                daftarStokKeluar, dagingController, karyawanController, view);
- 
-        muatDataAwal(dagingController, karyawanController, stokMasukController, stokKeluarController);
+                stokKeluarDAO, dagingDAO, karyawanDAO, view);
  
         int pilihanMenuUtama;
         do {
@@ -61,21 +74,11 @@ public class ManajemenStokDaging {
             }
         } while (pilihanMenuUtama != 0);
  
+        try {
+            koneksi.close();
+        } catch (SQLException kesalahanTutup) {
+            view.tampilkanPesan("Gagal menutup koneksi database: " + kesalahanTutup.getMessage());
+        }
         scanner.close();
-    }
-
-    private static void muatDataAwal(Dagingcontroller dagingController, Karyawancontroller karyawanController,
-                                      StokMasukController stokMasukController, StokKeluarController stokKeluarController) {
- 
-        dagingController.tambahkanDataAwal("Daging Sapi", "Paha", 10.5,
-                "01-09-2026", "10-09-2026", 3, "Tersedia");
-        dagingController.tambahkanDataAwal("Daging Ayam", "Dada", 5.0,
-                "02-09-2026", "05-09-2026", 15, "Tersedia");
- 
-        karyawanController.tambahkanDataAwal("Budi", "Admin Gudang");
- 
-        stokMasukController.tambahkanDataAwal(1, 1, "01-09-2026", 20, "Pembelian awal");
- 
-        stokKeluarController.tambahkanDataAwal(1, 1, "05-09-2026", 3, "Penjualan", "Dijual ke pelanggan");
     }
 }

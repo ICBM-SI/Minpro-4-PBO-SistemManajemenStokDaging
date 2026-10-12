@@ -4,25 +4,22 @@
  */
 package controller;
 
+import model.KaryawanDAO;
 import model.Karyawan;
 import view.DagingView;
-import java.util.ArrayList;
+import java.sql.SQLException;
 /**
  *
  * @author LENOVO
  */
 public class Karyawancontroller {
-    private int idKaryawanBerikutnya = 1;
-    private final ArrayList<Karyawan> daftarKaryawan;
+ 
+    private final KaryawanDAO karyawanDAO;
     private final DagingView view;
  
-    public Karyawancontroller(ArrayList<Karyawan> daftarKaryawan, DagingView view) {
-        this.daftarKaryawan = daftarKaryawan;
+    public Karyawancontroller(KaryawanDAO karyawanDAO, DagingView view) {
+        this.karyawanDAO = karyawanDAO;
         this.view = view;
-    }
- 
-    public void tambahkanDataAwal(String namaKaryawan, String jabatan) {
-        daftarKaryawan.add(new Karyawan(idKaryawanBerikutnya++, namaKaryawan, jabatan));
     }
  
     public void jalankanMenu() {
@@ -34,33 +31,28 @@ public class Karyawancontroller {
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 2);
  
-            if (pilihanMenu == 1) {
-                tambahKaryawan();
-            } else if (pilihanMenu == 2) {
-                tampilkanDaftarKaryawan();
+            try {
+                if (pilihanMenu == 1) {
+                    tambahKaryawan();
+                } else if (pilihanMenu == 2) {
+                    tampilkanDaftarKaryawan();
+                }
+            } catch (SQLException kesalahanDatabase) {
+                view.tampilkanPesan("Terjadi kesalahan database: " + kesalahanDatabase.getMessage());
             }
         } while (pilihanMenu != 0);
     }
  
-    private void tambahKaryawan() {
+    private void tambahKaryawan() throws SQLException {
         String namaKaryawan = view.bacaTeks("Nama karyawan", "Budi Santoso");
         String jabatan = view.bacaTeks("Jabatan", "Admin Gudang");
  
-        int idBaru = idKaryawanBerikutnya;
-        tambahkanDataAwal(namaKaryawan, jabatan);
-        view.tampilkanPesan("Data karyawan berhasil ditambahkan dengan ID " + idBaru + "!");
+        // ID diisi 0 sebagai tanda "belum punya ID"; ID sebenarnya dibuat otomatis oleh database
+        karyawanDAO.tambah(new Karyawan(0, namaKaryawan, jabatan));
+        view.tampilkanPesan("Data karyawan berhasil ditambahkan!");
     }
  
-    public void tampilkanDaftarKaryawan() {
-        view.tampilkanTabelKaryawan(daftarKaryawan);
-    }
- 
-    public Karyawan cariKaryawanById(int idKaryawan) {
-        for (Karyawan karyawanItem : daftarKaryawan) {
-            if (karyawanItem.getIdKaryawan() == idKaryawan) {
-                return karyawanItem;
-            }
-        }
-        return null;
+    public void tampilkanDaftarKaryawan() throws SQLException {
+        view.tampilkanTabelKaryawan(karyawanDAO.ambilSemua());
     }
 }

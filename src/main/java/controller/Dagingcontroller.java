@@ -4,27 +4,23 @@
  */
 package controller;
 
+import model.DagingDAO;
 import model.Daging;
 import view.DagingView;
+import java.sql.SQLException;
 import java.util.ArrayList;
 /**
  *
  * @author LENOVO
  */
 public class Dagingcontroller {
-    private int idDagingBerikutnya = 1;
-    private final ArrayList<Daging> daftarDaging;
+ 
+    private final DagingDAO dagingDAO;
     private final DagingView view;
-
-    public Dagingcontroller(ArrayList<Daging> daftarDaging, DagingView view) {
-        this.daftarDaging = daftarDaging;
+ 
+    public Dagingcontroller(DagingDAO dagingDAO, DagingView view) {
+        this.dagingDAO = dagingDAO;
         this.view = view;
-    }
-
-    public void tambahkanDataAwal(String namaDaging, String bagianDaging, double berat,
-                                   String tanggalMasuk, String tanggalExpired, int stok, String status) {
-        daftarDaging.add(new Daging(idDagingBerikutnya++, namaDaging, bagianDaging, berat,
-                tanggalMasuk, tanggalExpired, stok, status));
     }
  
     public void jalankanMenu() {
@@ -37,19 +33,24 @@ public class Dagingcontroller {
                     "4. Hapus Data Daging",
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 4);
-            if (pilihanMenu == 1) {
-                tambahDaging();
-            } else if (pilihanMenu == 2) {
-                tampilkanDaftarDaging();
-            } else if (pilihanMenu == 3) {
-                ubahDaging();
-            } else if (pilihanMenu == 4) {
-                hapusDaging();
+ 
+            try {
+                if (pilihanMenu == 1) {
+                    tambahDaging();
+                } else if (pilihanMenu == 2) {
+                    tampilkanDaftarDaging();
+                } else if (pilihanMenu == 3) {
+                    ubahDaging();
+                } else if (pilihanMenu == 4) {
+                    hapusDaging();
+                }
+            } catch (SQLException kesalahanDatabase) {
+                view.tampilkanPesan("Terjadi kesalahan database: " + kesalahanDatabase.getMessage());
             }
         } while (pilihanMenu != 0);
     }
  
-    private void tambahDaging() {
+    private void tambahDaging() throws SQLException {
         String namaDaging = view.bacaTeks("Nama daging", "Daging Sapi");
         String bagianDaging = view.bacaTeks("Bagian daging", "Paha");
         double berat = view.bacaAngkaDesimalPositif("Berat dalam kg (contoh: 10.5): ");
@@ -58,22 +59,25 @@ public class Dagingcontroller {
         int stok = view.bacaAngkaNonNegatif("Jumlah stok awal (contoh: 20): ");
         String status = view.bacaTeks("Status", "Tersedia");
  
-        int idBaru = idDagingBerikutnya;
-        tambahkanDataAwal(namaDaging, bagianDaging, berat, tanggalMasuk, tanggalExpired, stok, status);
-        view.tampilkanPesan("Data daging berhasil ditambahkan dengan ID " + idBaru + "!");
+        // ID diisi 0 sebagai tanda "belum punya ID"; ID sebenarnya dibuat otomatis oleh database
+        Daging dagingBaru = new Daging(0, namaDaging, bagianDaging, berat,
+                tanggalMasuk, tanggalExpired, stok, status);
+        dagingDAO.tambah(dagingBaru);
+        view.tampilkanPesan("Data daging berhasil ditambahkan!");
     }
  
-    public void tampilkanDaftarDaging() {
+    public void tampilkanDaftarDaging() throws SQLException {
+        view.tampilkanTabelDaging(dagingDAO.ambilSemua());
+    }
+ 
+    private void ubahDaging() throws SQLException {
+        ArrayList<Daging> daftarDaging = dagingDAO.ambilSemua();
         view.tampilkanTabelDaging(daftarDaging);
-    }
- 
-    private void ubahDaging() {
-        tampilkanDaftarDaging();
         if (daftarDaging.isEmpty()) {
             return;
         }
         int idDagingDipilih = view.bacaAngkaPositif("ID daging yang ingin diubah (contoh: 1): ");
-        Daging dagingTerpilih = cariDagingById(idDagingDipilih);
+        Daging dagingTerpilih = dagingDAO.cariById(idDagingDipilih);
         if (dagingTerpilih == null) {
             view.tampilkanPesan("ID daging tidak ditemukan!");
             return;
@@ -82,30 +86,27 @@ public class Dagingcontroller {
         dagingTerpilih.setNamaDaging(view.bacaTeks("Nama daging baru", dagingTerpilih.getNamaDaging()));
         dagingTerpilih.setStok(view.bacaAngkaNonNegatif("Stok baru (contoh: 15): "));
         dagingTerpilih.setStatus(view.bacaTeks("Status baru", "Tersedia"));
+        dagingDAO.ubah(dagingTerpilih);
         view.tampilkanPesan("Data daging berhasil diubah!");
     }
  
-    private void hapusDaging() {
-        tampilkanDaftarDaging();
+    private void hapusDaging() throws SQLException {
+        ArrayList<Daging> daftarDaging = dagingDAO.ambilSemua();
+        view.tampilkanTabelDaging(daftarDaging);
         if (daftarDaging.isEmpty()) {
             return;
         }
         int idDagingDipilih = view.bacaAngkaPositif("ID daging yang ingin dihapus (contoh: 1): ");
-        Daging dagingTerpilih = cariDagingById(idDagingDipilih);
+        Daging dagingTerpilih = dagingDAO.cariById(idDagingDipilih);
         if (dagingTerpilih == null) {
             view.tampilkanPesan("ID daging tidak ditemukan!");
             return;
         }
-        daftarDaging.remove(dagingTerpilih);
-        view.tampilkanPesan("Data daging berhasil dihapus!");
-    }
-
-    public Daging cariDagingById(int idDaging) {
-        for (Daging dagingItem : daftarDaging) {
-            if (dagingItem.getIdDaging() == idDaging) {
-                return dagingItem;
-            }
+        if (dagingDAO.punyaRiwayatTransaksi(idDagingDipilih)) {
+            view.tampilkanPesan("Daging tidak bisa dihapus karena sudah punya riwayat stok masuk/keluar.");
+            return;
         }
-        return null;
+        dagingDAO.hapus(idDagingDipilih);
+        view.tampilkanPesan("Data daging berhasil dihapus!");
     }
 }

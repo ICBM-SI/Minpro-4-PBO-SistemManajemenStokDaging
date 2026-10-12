@@ -4,40 +4,31 @@
  */
 package controller;
 
+import model.DagingDAO;
+import model.KaryawanDAO;
+import model.StokKeluarDAO;
 import model.Daging;
 import model.Karyawan;
 import model.StokKeluar;
 import view.DagingView;
-import java.util.ArrayList;
+import java.sql.SQLException;
 /**
  *
  * @author LENOVO
  */
 public class StokKeluarController {
-    private int idStokKeluarBerikutnya = 1;
-    private final ArrayList<StokKeluar> daftarStokKeluar;
-    private final Dagingcontroller dagingController;
-    private final Karyawancontroller karyawanController;
+ 
+    private final StokKeluarDAO stokKeluarDAO;
+    private final DagingDAO dagingDAO;
+    private final KaryawanDAO karyawanDAO;
     private final DagingView view;
  
-    public StokKeluarController(ArrayList<StokKeluar> daftarStokKeluar, Dagingcontroller dagingController,
-                                 Karyawancontroller karyawanController, DagingView view) {
-        this.daftarStokKeluar = daftarStokKeluar;
-        this.dagingController = dagingController;
-        this.karyawanController = karyawanController;
+    public StokKeluarController(StokKeluarDAO stokKeluarDAO, DagingDAO dagingDAO,
+                                 KaryawanDAO karyawanDAO, DagingView view) {
+        this.stokKeluarDAO = stokKeluarDAO;
+        this.dagingDAO = dagingDAO;
+        this.karyawanDAO = karyawanDAO;
         this.view = view;
-    }
- 
-    public void tambahkanDataAwal(int idDaging, int idKaryawan, String tanggalKeluar,
-                                   int jumlah, String alasan, String keterangan) {
-        StokKeluar stokKeluarBaru = new StokKeluar(idStokKeluarBerikutnya++, idDaging, idKaryawan,
-                tanggalKeluar, jumlah, alasan, keterangan);
-        daftarStokKeluar.add(stokKeluarBaru);
- 
-        Daging dagingTerkait = dagingController.cariDagingById(idDaging);
-        if (dagingTerkait != null) {
-            dagingTerkait.setStok(dagingTerkait.getStok() - jumlah);
-        }
     }
  
     public void jalankanMenu() {
@@ -49,26 +40,30 @@ public class StokKeluarController {
                     "0. Kembali ke Menu Utama"});
             pilihanMenu = view.bacaAngka("Pilih menu: ", 0, 2);
  
-            if (pilihanMenu == 1) {
-                catatStokKeluar();
-            } else if (pilihanMenu == 2) {
-                tampilkanDaftarStokKeluar();
+            try {
+                if (pilihanMenu == 1) {
+                    catatStokKeluar();
+                } else if (pilihanMenu == 2) {
+                    tampilkanDaftarStokKeluar();
+                }
+            } catch (SQLException kesalahanDatabase) {
+                view.tampilkanPesan("Terjadi kesalahan database: " + kesalahanDatabase.getMessage());
             }
         } while (pilihanMenu != 0);
     }
  
-    private void catatStokKeluar() {
-        dagingController.tampilkanDaftarDaging();
+    private void catatStokKeluar() throws SQLException {
+        view.tampilkanTabelDaging(dagingDAO.ambilSemua());
         int idDagingDipilih = view.bacaAngkaPositif("ID daging yang keluar (lihat daftar di atas): ");
-        Daging dagingTerpilih = dagingController.cariDagingById(idDagingDipilih);
+        Daging dagingTerpilih = dagingDAO.cariById(idDagingDipilih);
         if (dagingTerpilih == null) {
             view.tampilkanPesan("ID daging tidak ditemukan!");
             return;
         }
  
-        karyawanController.tampilkanDaftarKaryawan();
+        view.tampilkanTabelKaryawan(karyawanDAO.ambilSemua());
         int idKaryawanDipilih = view.bacaAngkaPositif("ID karyawan yang mencatat (lihat daftar di atas): ");
-        Karyawan karyawanTerpilih = karyawanController.cariKaryawanById(idKaryawanDipilih);
+        Karyawan karyawanTerpilih = karyawanDAO.cariById(idKaryawanDipilih);
         if (karyawanTerpilih == null) {
             view.tampilkanPesan("ID karyawan tidak ditemukan!");
             return;
@@ -85,12 +80,18 @@ public class StokKeluarController {
         String alasan = view.bacaTeks("Alasan", "Penjualan ke pelanggan");
         String keterangan = view.bacaTeks("Keterangan", "Dijual ke pelanggan tetap");
  
-        tambahkanDataAwal(idDagingDipilih, idKaryawanDipilih, tanggalKeluar, jumlah, alasan, keterangan);
+        // ID stok keluar diisi 0 (dibuat otomatis oleh database)
+        StokKeluar stokKeluarBaru = new StokKeluar(0, idDagingDipilih, idKaryawanDipilih,
+                tanggalKeluar, jumlah, alasan, keterangan);
+        stokKeluarDAO.tambah(stokKeluarBaru);
+        dagingDAO.ubahStok(idDagingDipilih, -jumlah);
+ 
+        Daging dagingTerbaru = dagingDAO.cariById(idDagingDipilih);
         view.tampilkanPesan("Stok keluar berhasil dicatat, sisa stok daging menjadi "
-                + dagingTerpilih.getStok() + "!");
+                + dagingTerbaru.getStok() + "!");
     }
  
-    public void tampilkanDaftarStokKeluar() {
-        view.tampilkanTabelStokKeluar(daftarStokKeluar);
+    public void tampilkanDaftarStokKeluar() throws SQLException {
+        view.tampilkanTabelStokKeluar(stokKeluarDAO.ambilSemua());
     }
 }
