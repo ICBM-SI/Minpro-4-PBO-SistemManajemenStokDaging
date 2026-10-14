@@ -196,6 +196,74 @@ Penerapan Abstraction terletak pada class TransaksiStok yang merupakan abstract 
 
 <img width="452" height="72" alt="image" src="https://github.com/user-attachments/assets/e45cb756-4463-49a6-900d-3edf7325c17a" />
 
+# Penerapan JDBC
+
+Pada program ini JDBC dipakai untuk menghubungkan program ke database MySQL sehingga seluruh data daging, karyawan, stok masuk, dan stok keluar tersimpan di database dan tidak hilang ketika program ditutup.
+
+## 1. Koneksi Database
+
+Koneksi dibuat di class Koneksi pada package config. Pengaturan database (URL, user, dan password) disimpan di satu tempat sehingga mudah diubah. Method getConnection() mengembalikan objek Connection jika koneksi gagal.
+
+<img width="942" height="472" alt="image" src="https://github.com/user-attachments/assets/7bdd3db1-2e29-4d62-98a9-cc7da6ce3b68" />
+
+Di entry point, koneksi dibuka satu kali saat program mulai, lalu objek Connection yang sama diberikan ke setiap DAO. Jika koneksi gagal, program menampilkan pesan dan petunjuk pengecekan lalu berhenti dengan rapi.
+
+<img width="1092" height="243" alt="image" src="https://github.com/user-attachments/assets/7608733f-2b2b-4517-b9f8-b3c8b7fc89c8" />
+
+<img width="750" height="793" alt="image" src="https://github.com/user-attachments/assets/8a00756e-2947-481f-8c2b-62c8a7e27fd1" />
+
+## 2. Database dan Dummy Data (file .sql)
+
+Struktur tabel dan data awal ditulis dalam file database/db_manajemenstokdaging.sql. Data awal diisi lewat database, bukan lewat kode program, sehingga saat menu Lihat dijalankan data langsung tampil tanpa harus input dari awal.
+
+Database memiliki 4 tabel sesuai entitas program:
+ 
+| Tabel | Isi |
+|---|---|
+| `daging` | Data daging dan stok saat ini |
+| `karyawan` | Data karyawan |
+| `stok_masuk` | Riwayat stok masuk (terhubung ke `daging` dan `karyawan` lewat foreign key) |
+| `stok_keluar` | Riwayat stok keluar (terhubung ke `daging` dan `karyawan` lewat foreign key) |
+ 
+Kolom ID pada setiap tabel menggunakan Auto_Increment, sehingga ID dibuat otomatis oleh database dan pengguna tidak perlu mengetik ID baru.
+
+<img width="1222" height="701" alt="image" src="https://github.com/user-attachments/assets/664bf9d0-17bc-4aad-8345-01a63761b519" />
+
+Dummy data yang tersedia: 3 data daging, 2 data karyawan, 3 data stok masuk, dan 2 data stok keluar. Stok pada tabel daging sudah sesuai dengan riwayat transaksinya.
+
+<img width="1133" height="665" alt="image" src="https://github.com/user-attachments/assets/c0e059db-585e-472f-9480-18762604342e" />
+
+Hasilnya, saat program pertama kali dijalankan dan menu Lihat dipilih, data dummy langsung tampil.
+
+<img width="725" height="253" alt="image" src="https://github.com/user-attachments/assets/9f2fa3fc-cfdd-4042-afaf-1eb311c53786" />
+
+## 3. DAO (Data Access Object)
+
+DAO dipakai untuk memisahkan kode akses database dari bagian program lainnya. Setiap entitas memiliki satu class DAO yang berisi seluruh perintah SQL untuk tabel tersebut. Controller tidak menulis SQL sama sekali dan hanya memanggil method DAO.
+
+| Class DAO | Tabel | Method |
+|---|---|---|
+| `DagingDAO` | `daging` | `tambah`, `ambilSemua`, `cariById`, `ubah`, `hapus`, `ubahStok`, `punyaRiwayatTransaksi` |
+| `KaryawanDAO` | `karyawan` | `tambah`, `ambilSemua`, `cariById` |
+| `StokMasukDAO` | `stok_masuk` | `tambah`, `ambilSemua`, `ambilIdSupplierBerikutnya` |
+| `StokKeluarDAO` | `stok_keluar` | `tambah`, `ambilSemua` |
+
+Alur kerja data pada program:
+ 
+```
+View  ->  Controller  ->  DAO  ->  Database MySQL
+(input)   (logika)       (SQL)     (penyimpanan)
+```
+
+## 4. PreparedStatement
+ 
+Semua query pada program ini menggunakan PreparedStatement. Nilai pada SQL ditulis sebagai tanda tanya (?), lalu diisi lewat method setString(), setInt(), atau setDouble(). Dengan cara ini, input pengguna tidak pernah digabung langsung ke dalam teks SQL, sehingga lebih aman dari SQL Injection dan lebih rapi dibanding menyambung string secara manual.
+
+
+
+
+
+
 
 
 
